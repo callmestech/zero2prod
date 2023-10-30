@@ -1,3 +1,5 @@
+use std::net::TcpListener;
+
 use axum::{http::StatusCode, routing::get, Router};
 
 async fn health_check() -> StatusCode {
@@ -5,7 +7,11 @@ async fn health_check() -> StatusCode {
 }
 
 pub fn build_server(
-) -> hyper::Server<hyper::server::conn::AddrIncoming, axum::routing::IntoMakeService<Router>> {
+    listener: TcpListener,
+) -> Result<
+    hyper::Server<hyper::server::conn::AddrIncoming, axum::routing::IntoMakeService<Router>>,
+    hyper::Error,
+> {
     let app = Router::new().route("/health_check", get(health_check));
-    axum::Server::bind(&"127.0.0.1:8000".parse().unwrap()).serve(app.into_make_service())
+    axum::Server::from_tcp(listener).map(|builder| builder.serve(app.into_make_service()))
 }
