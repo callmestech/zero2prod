@@ -17,4 +17,5 @@ axum = "0.6.20"
 hyper = { version = "0.14.27", features = ["full"] }
 reqwest = "0.11.22"
 serde = { version = "1.0.190", features = ["serde_derive"] }
+sqlx = { version = "0.7.2", features = ["postgres"] }
 tokio = { version = "1.33.0", features = ["full"] }

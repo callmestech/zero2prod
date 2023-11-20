@@ -29,7 +29,7 @@ pub fn build_server(
 > {
     let app = Router::new()
         .route("/health_check", get(health_check))
-        .route("/subscription", post(subscribe));
+        .route("/subscriptions", post(subscribe));
 
     axum::Server::from_tcp(listener).map(|builder| builder.serve(app.into_make_service()))
 }
