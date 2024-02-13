@@ -15,7 +15,14 @@ name = "zero2prod"
 [dependencies]
 axum = "0.6.20"
 hyper = { version = "0.14.27", features = ["full"] }
-reqwest = "0.11.22"
-serde = { version = "1.0.190", features = ["serde_derive"] }
-sqlx = { version = "0.7.2", features = ["postgres"] }
-tokio = { version = "1.33.0", features = ["full"] }
+reqwest = "0.11.23"
+serde = { version = "1.0.195", features = ["serde_derive"] }
+sqlx = { version = "0.7.3", default-features = false, features = [
+  "postgres",
+  "runtime-actix-rustls",
+  "macros",
+  "uuid",
+  "chrono",
+  "migrate",
+] }
+tokio = { version = "1.35.1", features = ["full"] }
