@@ -18,8 +18,8 @@ hyper = { version = "0.14.27", features = ["full"] }
 reqwest = "0.11.23"
 serde = { version = "1.0.195", features = ["serde_derive"] }
 sqlx = { version = "0.7.3", default-features = false, features = [
+  "runtime-tokio",
   "postgres",
-  "runtime-actix-rustls",
   "macros",
   "uuid",
   "chrono",

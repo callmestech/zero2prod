@@ -1,3 +1,3 @@
-async fn health_check() -> hyper::StatusCode {
+pub async fn health_check() -> hyper::StatusCode {
     hyper::StatusCode::OK
 }
