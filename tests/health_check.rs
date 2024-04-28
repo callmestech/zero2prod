@@ -1,5 +1,6 @@
 #![allow(clippy::let_underscore_future)]
 use std::net::TcpListener;
+use zero2prod::configuration::get_configuration;
 
 #[tokio::test]
 async fn health_check_works() {
@@ -44,6 +45,12 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
 async fn subscribe_returns_a_400_when_data_is_missing() {
     // Arrange
     let address = spawn_app();
+    let settings = get_configuration().expect("Failed to read configuration.");
+    let connection_string = settings.database.connection_string();
+    let connection = sqlx::PgPool::connect(&connection_string)
+        .await
+        .expect("Failed to connect to Postgres.");
+
     let client = reqwest::Client::new();
     let test_cases = [
         ("name=le%20guin", "missing the email"),
