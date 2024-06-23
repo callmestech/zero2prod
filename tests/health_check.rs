@@ -1,6 +1,6 @@
 #![allow(clippy::let_underscore_future)]
 use sqlx::{Connection, PgConnection, PgPool};
-use std::net::TcpListener;
+use tokio::net::TcpListener;
 use uuid::Uuid;
 use zero2prod::{
     configuration::{get_configuration, DatabaseSettings},
@@ -93,7 +93,9 @@ struct TestApp {
 }
 
 async fn spawn_app() -> TestApp {
-    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port.");
+    let listener = TcpListener::bind("127.0.0.1:0")
+        .await
+        .expect("Failed to bind random port.");
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://127.0.0.1:{}", port);
 
@@ -101,8 +103,7 @@ async fn spawn_app() -> TestApp {
     configuration.database.database_name = Uuid::new_v4().to_string();
     let pg_pool = configure_db(&configuration.database).await;
 
-    let server = build_server(listener, pg_pool.clone()).expect("Failed to bind address.");
-    let _ = tokio::spawn(server);
+    let _ = tokio::spawn(build_server(listener, pg_pool.clone()));
     TestApp { address, pg_pool }
 }
 
