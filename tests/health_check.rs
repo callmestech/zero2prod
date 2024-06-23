@@ -1,10 +1,12 @@
 #![allow(clippy::let_underscore_future)]
+use once_cell::sync::Lazy;
 use sqlx::{Connection, PgConnection, PgPool};
 use tokio::net::TcpListener;
 use uuid::Uuid;
 use zero2prod::{
     configuration::{get_configuration, DatabaseSettings},
     startup::build_server,
+    telemetry::{get_subscriber, init_subscriber},
 };
 
 #[tokio::test]
@@ -87,12 +89,34 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
     }
 }
 
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let default_filter_level = "info";
+    let subscriber_name = "test";
+
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = get_subscriber(
+            subscriber_name.to_string(),
+            default_filter_level.to_string(),
+            std::io::stdout,
+        );
+        init_subscriber(subscriber);
+    } else {
+        let subscriber = get_subscriber(
+            subscriber_name.to_string(),
+            default_filter_level.to_string(),
+            std::io::sink,
+        );
+        init_subscriber(subscriber);
+    }
+});
+
 struct TestApp {
     pub address: String,
     pub pg_pool: sqlx::PgPool,
 }
 
 async fn spawn_app() -> TestApp {
+    Lazy::force(&TRACING);
     let listener = TcpListener::bind("127.0.0.1:0")
         .await
         .expect("Failed to bind random port.");

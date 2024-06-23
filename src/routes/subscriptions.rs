@@ -7,6 +7,7 @@ use axum::{
 };
 use chrono::Utc;
 use hyper::StatusCode;
+use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::startup::AppState;
@@ -17,29 +18,32 @@ pub struct FormData {
     email: String,
 }
 
-#[tracing::instrument(name = "subscriptions", skip(state, data), fields(name = data.name, email = data.email))]
+#[tracing::instrument(name = "Adding a new subcriber", skip(state, data), fields(user_name = data.name, user_email = data.email))]
 pub async fn subscribe(State(state): State<Arc<AppState>>, Form(data): Form<FormData>) -> Response {
-    tracing::info!("Saving new subscriber details");
-    match sqlx::query!(
+    match insert_subscriber(state.pg_pool(), data.name, data.email).await {
+        Ok(_) => StatusCode::OK.into_response(),
+        Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
+}
+
+#[tracing::instrument(name = "Saving new subcriber details", skip(pool))]
+async fn insert_subscriber(pool: &PgPool, name: String, email: String) -> Result<(), sqlx::Error> {
+    sqlx::query!(
         r#"
             INSERT INTO subscriptions (id, name, email, subscribed_at)
             VALUES ($1, $2, $3, $4)
             "#,
         Uuid::new_v4(),
-        data.name,
-        data.email,
+        name,
+        email,
         Utc::now(),
     )
-    .execute(state.pg_pool())
+    .execute(pool)
     .await
-    {
-        Ok(_) => {
-            tracing::info!("New subscriber details have been saved.");
-            StatusCode::OK.into_response()
-        }
-        Err(e) => {
-            tracing::error!("Failed to execute query: {:?}", e);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
-        }
-    }
+    .map_err(|e| {
+        tracing::error!("Failed to execute query: {:?}", e);
+        e
+    })?;
+
+    Ok(())
 }

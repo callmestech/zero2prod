@@ -1,5 +1,8 @@
 test:
-  cargo test
+  cargo test  
+
+test-dbg:
+  TEST_LOG=debug cargo test | bunyan
 
 fmt:
   cargo fmt --all
