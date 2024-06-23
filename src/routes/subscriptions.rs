@@ -17,7 +17,9 @@ pub struct FormData {
     email: String,
 }
 
+#[tracing::instrument(name = "subscriptions", skip(state, data), fields(name = data.name, email = data.email))]
 pub async fn subscribe(State(state): State<Arc<AppState>>, Form(data): Form<FormData>) -> Response {
+    tracing::info!("Saving new subscriber details");
     match sqlx::query!(
         r#"
             INSERT INTO subscriptions (id, name, email, subscribed_at)
@@ -31,9 +33,12 @@ pub async fn subscribe(State(state): State<Arc<AppState>>, Form(data): Form<Form
     .execute(state.pg_pool())
     .await
     {
-        Ok(_) => StatusCode::OK.into_response(),
+        Ok(_) => {
+            tracing::info!("New subscriber details have been saved.");
+            StatusCode::OK.into_response()
+        }
         Err(e) => {
-            println!("Failed to execute query: {:?}", e);
+            tracing::error!("Failed to execute query: {:?}", e);
             StatusCode::INTERNAL_SERVER_ERROR.into_response()
         }
     }
