@@ -1,6 +1,7 @@
-use sqlx::PgPool;
+use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 use zero2prod::{
+    configuration,
     startup::build_server,
     telemetry::{get_subscriber, init_subscriber},
 };
@@ -10,10 +11,8 @@ async fn main() -> std::io::Result<()> {
     let subscriber = get_subscriber("zero2prod".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
 
-    let settings =
-        zero2prod::configuration::get_configuration().expect("Failed to read configuration.");
-    let pg_pool = PgPool::connect_lazy(&settings.database.connection_string())
-        .expect("Failed to connect to Postgres.");
+    let settings = configuration::get_configuration().expect("Failed to read configuration.");
+    let pg_pool = PgPoolOptions::new().connect_lazy_with(settings.database.with_db());
     let address = format!(
         "{}:{}",
         settings.application.host, settings.application.port
