@@ -1,3 +1,4 @@
+use autometrics::prometheus_exporter;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 use zero2prod::{
@@ -10,6 +11,7 @@ use zero2prod::{
 async fn main() -> std::io::Result<()> {
     let subscriber = get_subscriber("zero2prod".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
+    prometheus_exporter::init();
 
     let settings = configuration::get_configuration().expect("Failed to read configuration.");
     let pg_pool = PgPoolOptions::new().connect_lazy_with(settings.database.with_db());

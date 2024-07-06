@@ -1,4 +1,4 @@
-use crate::routes::{health_check, subscribe};
+use crate::routes::{get_metrics, health_check, subscribe};
 use std::sync::Arc;
 
 use axum::{
@@ -28,6 +28,7 @@ pub async fn build_server(
     let app = Router::new()
         .route("/health_check", get(health_check))
         .route("/subscriptions", post(subscribe))
+        .route("/metrics", get(get_metrics))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(|request: &Request| {

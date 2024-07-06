@@ -13,6 +13,7 @@ path = "src/main.rs"
 name = "zero2prod"
 
 [dependencies]
+autometrics = { version = "1.0.1", features = ["prometheus-exporter"] }
 axum = "0.7.5"
 chrono = "0.4.38"
 config = "0.14.0"

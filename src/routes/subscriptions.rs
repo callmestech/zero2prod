@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use autometrics::autometrics;
 use axum::{
     extract::State,
     response::{IntoResponse, Response},
@@ -19,6 +20,7 @@ pub struct FormData {
 }
 
 #[tracing::instrument(name = "Adding a new subcriber", skip(state, data), fields(user_name = data.name, user_email = data.email))]
+#[autometrics]
 pub async fn subscribe(State(state): State<Arc<AppState>>, Form(data): Form<FormData>) -> Response {
     match insert_subscriber(state.pg_pool(), data.name, data.email).await {
         Ok(_) => StatusCode::OK.into_response(),
