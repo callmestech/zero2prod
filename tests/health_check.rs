@@ -89,6 +89,38 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
     }
 }
 
+#[tokio::test]
+async fn subscribe_returns_a_200_when_fields_are_present_but_empty() {
+    // Arrange
+    let test_app = spawn_app().await;
+
+    let client = reqwest::Client::new();
+    let test_cases = [
+        ("name=&email=ursula_le_guin%40gmail.com", "empty name"),
+        ("name=Ursula&email=", "empty email"),
+        ("name=Ursula&email=not_email", ""),
+    ];
+
+    // Act
+    for (invalid_body, error_message) in test_cases {
+        let respone = client
+            .post(&format!("{}/subscriptions", &test_app.address))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(invalid_body)
+            .send()
+            .await
+            .expect("Failed to execute request.");
+
+        // Assert
+        assert_eq!(
+            respone.status().as_u16(),
+            400,
+            "The API did not return a 400 Bad Request when the payload was {}.",
+            error_message
+        )
+    }
+}
+
 static TRACING: Lazy<()> = Lazy::new(|| {
     let default_filter_level = "info";
     let subscriber_name = "test";
