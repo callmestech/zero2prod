@@ -19,7 +19,7 @@ chrono = "0.4.38"
 config = "0.14.0"
 hyper = { version = "1.3.1", features = ["full"] }
 log = "0.4.22"
-reqwest = "0.12.5"
+reqwest = { version = "0.12.5", features = ["json", "rustls-tls"] }
 serde = { version = "1.0.195", features = ["serde_derive"] }
 serde-aux = "4.5.0"
 sqlx = { version = "0.7.4", default-features = false, features = [
@@ -49,3 +49,4 @@ fake = "2.9.2"
 once_cell = "1.19.0"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
+wiremock = "0.6.0"

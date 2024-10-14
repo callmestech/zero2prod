@@ -25,15 +25,23 @@ pub struct FormData {
 #[tracing::instrument(name = "Adding a new subcriber", skip(state, data), fields(user_name = data.name, user_email = data.email))]
 #[autometrics]
 pub async fn subscribe(State(state): State<Arc<AppState>>, Form(data): Form<FormData>) -> Response {
-    let new_subscriber = match SubscriberName::parse(data.name).and_then(|name| {
-        SubscriberEmail::parse(data.email).map(|email| NewSubscriber { email, name })
-    }) {
-        Ok(new_subscriber) => new_subscriber,
+    let new_subscriber = match data.try_into() {
+        Ok(subscriber) => subscriber,
         Err(_) => return StatusCode::BAD_REQUEST.into_response(),
     };
+
     match insert_subscriber(state.pg_pool(), &new_subscriber).await {
         Ok(_) => StatusCode::OK.into_response(),
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
+}
+
+impl TryFrom<FormData> for NewSubscriber {
+    type Error = String;
+    fn try_from(value: FormData) -> Result<Self, Self::Error> {
+        let name = SubscriberName::parse(value.name.clone()).map_err(|_| "Invalid name")?;
+        let email = SubscriberEmail::parse(value.email).map_err(|_| "Invalid email")?;
+        Ok(NewSubscriber { name, email })
     }
 }
 

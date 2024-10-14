@@ -8,26 +8,11 @@ global:
   evaluation_interval: 30s # Evaluate rules every 2 seconds. The default is every 1 minute.
   # scrape_timeout is set to the global default (10s).
 
-# Alertmanager configuration
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets: ["localhost:9093"]
-
-# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-# rule_files:
-# - "alert_rules.yml" # add alerting rules
-
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any time series scraped from this config.
-  - job_name: "prometheus"
+  - job_name: "zero2prod"
     static_configs:
-      - targets: ["localhost"]
-
-    # Allows ephemeral and batch jobs to expose their metrics to Prometheus
-  - job_name: "pushgateway"
-    honor_labels: true
-    static_configs:
-      - targets: ["localhost:9091"]
+      - targets: ["localhost:8888"]
+    metrics_path: "/metrics"

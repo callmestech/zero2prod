@@ -1,4 +1,7 @@
-use crate::routes::{get_metrics, health_check, subscribe};
+use crate::{
+    email_client::EmailClient,
+    routes::{get_metrics, health_check, subscribe},
+};
 use std::sync::Arc;
 
 use axum::{
@@ -12,19 +15,28 @@ use uuid::Uuid;
 
 pub struct AppState {
     pg_pool: sqlx::PgPool,
+    email_client: EmailClient,
 }
 
 impl AppState {
     pub fn pg_pool(&self) -> &sqlx::PgPool {
         &self.pg_pool
     }
+
+    pub fn email_client(&self) -> &EmailClient {
+        &self.email_client
+    }
 }
 
 pub async fn build_server(
     listener: TcpListener,
     pg_pool: sqlx::PgPool,
+    email_client: EmailClient,
 ) -> Result<(), std::io::Error> {
-    let state = Arc::new(AppState { pg_pool });
+    let state = Arc::new(AppState {
+        pg_pool,
+        email_client,
+    });
     let app = Router::new()
         .route("/health_check", get(health_check))
         .route("/subscriptions", post(subscribe))

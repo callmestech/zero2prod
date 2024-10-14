@@ -1,10 +1,13 @@
 #![allow(clippy::let_underscore_future)]
 use once_cell::sync::Lazy;
+use reqwest::Url;
 use sqlx::{Connection, PgConnection, PgPool};
 use tokio::net::TcpListener;
+use tracing_subscriber::fmt::format;
 use uuid::Uuid;
 use zero2prod::{
     configuration::{get_configuration, DatabaseSettings},
+    email_client::EmailClient,
     startup::build_server,
     telemetry::{get_subscriber, init_subscriber},
 };
@@ -158,8 +161,14 @@ async fn spawn_app() -> TestApp {
     let mut configuration = get_configuration().expect("Failed to read configuration.");
     configuration.database.database_name = Uuid::new_v4().to_string();
     let pg_pool = configure_db(&configuration.database).await;
+    let base_url = Url::parse(&format!("http://{}", &configuration.email_client.base_url)).unwrap();
+    let email_client = EmailClient::new(
+        base_url,
+        configuration.email_client.sender().unwrap(),
+        configuration.email_client.authorization_token,
+    );
 
-    let _ = tokio::spawn(build_server(listener, pg_pool.clone()));
+    let _ = tokio::spawn(build_server(listener, pg_pool.clone(), email_client));
     TestApp { address, pg_pool }
 }
 
