@@ -48,7 +48,7 @@ pub async fn build_server(
                     Some(value) => value.to_str().unwrap_or_default().to_string(),
                     None =>
                         Uuid::new_v4().to_string(),
-                }; 
+                };
                 let path = request.uri().path().to_string();
                 if path == "/metrics" || path == "/health_check" {
                     tracing::trace_span!("http-request", "method" = ?request.method(), "request_id" = ?request_id, "uri" = ?request.uri())

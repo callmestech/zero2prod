@@ -1,9 +1,9 @@
 #![allow(clippy::let_underscore_future)]
+
 use once_cell::sync::Lazy;
 use reqwest::Url;
 use sqlx::{Connection, PgConnection, PgPool};
 use tokio::net::TcpListener;
-use tracing_subscriber::fmt::format;
 use uuid::Uuid;
 use zero2prod::{
     configuration::{get_configuration, DatabaseSettings},

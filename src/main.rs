@@ -1,4 +1,4 @@
-use autometrics::{prometheus_exporter, settings};
+use autometrics::prometheus_exporter;
 use reqwest::Url;
 use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
