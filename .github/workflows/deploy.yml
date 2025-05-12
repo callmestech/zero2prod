@@ -46,8 +46,8 @@ jobs:
 
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
 
-            docker stop my-app || true
-            docker rm my-app || true
+            docker stop zero2prod || true
+            docker rm zero2prod || true
 
-            docker run -d --name my-app -p 8888:8888 \
+            docker run -d --name zero2prod -p 8888:8888 \
               ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
